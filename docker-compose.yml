@@ -1,0 +1,122 @@
+services:
+  # postgresql:
+  #   image: postgres:latest
+  #   container_name: postgres
+  #   restart: unless-stopped
+  #   environment:
+  #     - POSTGRES_DB=postgres_db
+  #     - POSTGRES_USER=user
+  #     - POSTGRES_PASSWORD=password
+  #     - POSTGRES_ROOT_PASSWORD=lmao
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - ./.docker/postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - fireant_crawler
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper
+    container_name: zookeeper
+    ports:
+      - 2181:2181
+    environment:
+      # ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 5
+      # ZOOKEEPER_SERVERS: zk1:22888:23888;zk2:32888:33888;zk3:42888:43888
+    networks:
+      - fireant_crawler
+
+  # zk2:
+  #   image: confluentinc/cp-zookeeper
+  #   container_name: zk2
+  #   ports:
+  #     - 32181:2181
+  #   environment:
+  #     ZOOKEEPER_SERVER_ID: 2
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #     ZOOKEEPER_INIT_LIMIT: 5
+  #     ZOOKEEPER_SYNC_LIMIT: 2
+  #     ZOOKEEPER_SERVERS: zk1:22888:23888;zk2:32888:33888;zk3:42888:43888
+  #   networks:
+  #     - fireant_crawler
+  #
+  # zk3:
+  #   image: confluentinc/cp-zookeeper
+  #   container_name: zk3
+  #   ports:
+  #     - 42181:2181
+  #   environment:
+  #     ZOOKEEPER_SERVER_ID: 3
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #     ZOOKEEPER_INIT_LIMIT: 5
+  #     ZOOKEEPER_SYNC_LIMIT: 2
+  #     ZOOKEEPER_SERVERS: zk1:22888:23888;zk2:32888:33888;zk3:42888:43888
+  #   networks:
+  #     - fireant_crawler
+
+  kafka:
+    image: confluentinc/cp-kafka
+    container_name: kafka
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    environment:
+      # KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092, PLAINTEXT_HOST://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - fireant_crawler
+
+  # kafka-2:
+  #   image: confluentinc/cp-kafka
+  #   container_name: kafka-2
+  #   ports:
+  #     - 29092:29092
+  #   depends_on:
+  #     - zk1
+  #     - zk2
+  #     - zk3
+  #   environment:
+  #     KAFKA_BROKER_ID: 2
+  #     KAFKA_ZOOKEEPER_CONNECT: zk1:2181,zk2:2181,zk3:2181
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092, PLAINTEXT_HOST://localhost:29092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #   networks:
+  #     - fireant_crawler
+  #
+  # kafka-3:
+  #   image: confluentinc/cp-kafka
+  #   container_name: kafka-3
+  #   ports:
+  #     - 39092:39092
+  #   depends_on:
+  #     - zk1
+  #     - zk2
+  #     - zk3
+  #   environment:
+  #     KAFKA_BROKER_ID: 3
+  #     KAFKA_ZOOKEEPER_CONNECT: zk1:2181,zk2:2181,zk3:2181
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092, PLAINTEXT_HOST://localhost:39092
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #   networks:
+  #     - fireant_crawler
+
+networks:
+  fireant_crawler:
+    name: fireant_crawler
+    external: false
+

@@ -7,10 +7,12 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+# from kafka_client import producer
+
 
 class Crawler:
-    def __init__(self):
-        self.driver = None
+    def __init__(self, driver: WebDriver):
+        self.driver = driver
 
     def init_browser(self):
         pass
@@ -66,6 +68,8 @@ def get_all_data_in_tag(webelement: WebElement) -> str:
         except StaleElementReferenceException:
             attempt -= 1
             continue
+
+    if attempt == 0:
         return result
 
     attempt = 3
@@ -97,6 +101,7 @@ last_height = driver.execute_script("return document.body.scrollHeight")
 popup_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Để sau')]")))
 popup_btn.click()
 while True:
+    print("Begin crawling")
     parent_selector = "#postList > div:nth-child(1) > div > div:nth-child(2)"
     parent = driver.find_element(By.CSS_SELECTOR, parent_selector)
     for idx in range(1, 4):
@@ -113,6 +118,7 @@ while True:
                     attempt -= 1
                 continue
             text = get_all_data_in_tag(child)
+            # producer.send(topic="testing", value=text)
             tmp["comment"] = text
             print(tmp)
             result.append(tmp)
