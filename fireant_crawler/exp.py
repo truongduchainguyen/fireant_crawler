@@ -7,7 +7,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# from kafka_client import producer
+from kafka_client import producer
 
 
 class Crawler:
@@ -120,7 +120,7 @@ while True:
             text = get_all_data_in_tag(child)
             # producer.send(topic="testing", value=text)
             tmp["comment"] = text
-            print(tmp)
+            producer.send("testing", str.encode(text, "utf-8"))
             result.append(tmp)
             attempt = 0
 
