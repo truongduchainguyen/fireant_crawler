@@ -50,32 +50,26 @@ class Crawler:
 
 def get_all_data_in_tag(webelement: WebElement) -> str:
     result = ""
+    elem = None
     try:
         result += webelement.text
-    except InvalidArgumentException:
+    except (InvalidArgumentException, StaleElementReferenceException):
         return result
-
-    try:
-        elem = webelement.find_element(By.CSS_SELECTOR, "a.font-semibold.cursor-pointer")
-    except NoSuchElementException:
-        return result
-
-    # time.sleep(2)
-    # attempt = 3
-    # while attempt > 0:
-    #     try:
-    #         result += elem.text
-    #     except StaleElementReferenceException:
-    #         attempt -= 1
-    #         continue
-    #
-    # if attempt == 0:
-    #     return result
 
     attempt = 3
     if "Thêm".encode("utf-8") in result.encode("utf-8"):
-        time.sleep(2)
-        attempt = 3
+        while attempt > 0:
+            try:
+                elem = webelement.find_element(By.CSS_SELECTOR, "a.font-semibold.cursor-pointer")
+                break
+            except (NoSuchElementException, StaleElementReferenceException):
+                attempt -= 1
+
+    if attempt == 0:
+        return result
+
+    attempt = 3
+    if elem:
         while attempt > 0:
             try:
                 driver.execute_script("arguments[0].click();", elem)
@@ -132,7 +126,7 @@ while True:
     # Scroll down to the bottom
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     # Wait for page to load
-    time.sleep(0.5)
+    time.sleep(2)
     # Calculate new scroll height and compare with last scroll height
     new_height = driver.execute_script("return document.body.scrollHeight")
 
