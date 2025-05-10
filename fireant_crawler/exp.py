@@ -56,21 +56,21 @@ def get_all_data_in_tag(webelement: WebElement) -> str:
         return result
 
     try:
-        elem = webelement.find_element(By.CSS_SELECTOR, "a.cursor-pointer")
+        elem = webelement.find_element(By.CSS_SELECTOR, "a.font-semibold.cursor-pointer")
     except NoSuchElementException:
         return result
 
-    time.sleep(2)
-    attempt = 3
-    while attempt > 0:
-        try:
-            result += elem.text
-        except StaleElementReferenceException:
-            attempt -= 1
-            continue
-
-    if attempt == 0:
-        return result
+    # time.sleep(2)
+    # attempt = 3
+    # while attempt > 0:
+    #     try:
+    #         result += elem.text
+    #     except StaleElementReferenceException:
+    #         attempt -= 1
+    #         continue
+    #
+    # if attempt == 0:
+    #     return result
 
     attempt = 3
     if "Thêm".encode("utf-8") in result.encode("utf-8"):
@@ -95,13 +95,14 @@ url = "https://fireant.vn/cong-dong/moi-nhat"
 driver.get(url)
 result = []
 
-wait = WebDriverWait(driver, 20)
+wait = WebDriverWait(driver, 10)
 
 last_height = driver.execute_script("return document.body.scrollHeight")
+print(last_height)
 popup_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Để sau')]")))
 popup_btn.click()
+print("Begin crawling")
 while True:
-    print("Begin crawling")
     parent_selector = "#postList > div:nth-child(1) > div > div:nth-child(2)"
     parent = driver.find_element(By.CSS_SELECTOR, parent_selector)
     for idx in range(1, 4):
@@ -120,7 +121,8 @@ while True:
             text = get_all_data_in_tag(child)
             # producer.send(topic="testing", value=text)
             tmp["comment"] = text
-            producer.send("testing", str.encode(text, "utf-8"))
+            producer.send("testing", text)
+            producer.flush()
             result.append(tmp)
             attempt = 0
 
@@ -130,7 +132,7 @@ while True:
     # Scroll down to the bottom
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     # Wait for page to load
-    time.sleep(2)
+    time.sleep(0.5)
     # Calculate new scroll height and compare with last scroll height
     new_height = driver.execute_script("return document.body.scrollHeight")
 
